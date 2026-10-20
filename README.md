@@ -217,6 +217,8 @@ python cli.py selftest
 
 三个仓库的字段命名一致（`order_id` / `order_date` / `region` / `channel` / `qty` / `unit_price`），可串成 `接口同步 → 清洗 → 报表` 的链路：本仓库负责把散落文件与接口数据整理成规范 CSV，项目二补齐 `amount`、`status` 等字段并清洗，项目三直接用清洗产物出报表（已实测：`clean_dataset.csv` 260 行可直接生成报表）。
 
+**汇总演示页（一页看全三个项目）**：https://mming-liu.github.io/bid-demo-overview/ —— 三张实拍截图、硬指标、服务编号对照与现场验证命令。
+
 ---
 
 维护：需求分析师 + 测试与开发工程师 轻量化协作 · 需求先对齐，脚本再落地
