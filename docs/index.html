@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>办公自动化批处理日报</title><style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6fa;color:#1f2937;font:14px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 20px 60px}
+.mono{font-family:"Cascadia Mono",Consolas,"SF Mono",monospace}
+.hero{background:linear-gradient(125deg,#123a63,#1d5f9c);color:#fff;border-radius:16px;padding:32px 34px;box-shadow:0 12px 30px rgba(18,58,99,.2);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-60px;bottom:-90px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.06)}
+.hero .tag{display:inline-block;font-size:11.5px;letter-spacing:.2em;background:rgba(255,255,255,.16);padding:5px 11px;border-radius:4px}
+.hero h1{margin:15px 0 8px;font-size:26px;font-weight:700;letter-spacing:.5px}
+.hero p{margin:0;color:#c7dcf1;font-size:12.5px;line-height:1.9}
+.hero .big{display:flex;gap:34px;margin-top:20px;flex-wrap:wrap}
+.hero .big div{font-size:12px;color:#a9c6e2}
+.hero .big b{display:block;font-size:26px;color:#fff;line-height:1.3;letter-spacing:-.5px}
+section{background:#fff;border:1px solid #e4eaf2;border-radius:14px;padding:24px 26px;margin-top:18px;box-shadow:0 2px 8px rgba(24,42,66,.045)}
+h2{font-size:16px;margin:0 0 4px;color:#123a63;display:flex;align-items:center;gap:9px}
+h2 .idx{width:24px;height:24px;line-height:24px;text-align:center;background:#123a63;color:#fff;border-radius:6px;font-size:12px;font-weight:600}
+h2 small{font-weight:400;color:#8a9aae;font-size:12px;margin-left:auto}
+.sub{color:#7b8a9c;font-size:12.5px;margin:6px 0 16px}
+.step{display:grid;grid-template-columns:26px 1fr;gap:14px;padding:16px 0;border-bottom:1px dashed #e7eef6}
+.step:last-child{border-bottom:none;padding-bottom:0}
+.step .n{width:26px;height:26px;line-height:26px;text-align:center;background:#eef4fb;color:#123a63;border-radius:50%;font-weight:700;font-size:12.5px}
+.step h3{margin:2px 0 6px;font-size:14px;color:#123a63}
+.step .cmd{display:inline-block;background:#0f2942;color:#a8d5ff;font-size:11.5px;padding:4px 10px;border-radius:5px;margin-bottom:8px}
+.step .res{font-size:13px;color:#4b5c71}
+.step .res b{color:#0f6b3d;font-size:15px}
+.step .meta{font-size:11.5px;color:#8a9aae;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:12.8px}
+th{background:#f4f7fb;color:#4b5c71;font-weight:600;text-align:left;padding:9px 10px;border-bottom:2px solid #e1e9f2;white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid #eff3f8}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fafcff}
+.arrow{color:#94a3b8;margin:0 6px}
+.new{color:#0f6b3d;font-weight:600}
+.pill{display:inline-block;font-size:11px;padding:1px 8px;border-radius:20px;background:#eef7f0;color:#0f6b3d}
+.pill.gray{background:#f1f5fa;color:#5b6b7f}
+.checks{display:grid;gap:10px}
+.check{display:grid;grid-template-columns:18px 1fr;gap:12px;font-size:13px;color:#4b5c71}
+.check .box{width:16px;height:16px;border:1.5px solid #c7d5e5;border-radius:4px;margin-top:4px}
+.check b{color:#123a63;display:block;font-size:13px}
+footer{margin-top:22px;color:#8a9aae;font-size:11.5px;text-align:center;line-height:1.9}
+</style></head>
+<body><div class="wrap">
+  <div class="hero">
+    <div class="tag">PYTHON 本地脚本 · 执行报告</div>
+    <h1>办公自动化批处理日报</h1>
+    <p>工作目录 <span class="mono">C:\myFloders\git\py-automation-kit\workspace</span> ｜ 执行时间 2026-10-20 20:49:54<br>
+    一次运行完成 4 个任务，全程本地执行，未连接外网、未依赖任何第三方包</p>
+    <div class="big">
+      <div><b>19</b>文件已归位</div>
+      <div><b>60</b>行表格已合并</div>
+      <div><b>137</b>条订单已同步</div>
+      <div><b>0</b>第三方依赖</div>
+    </div>
+  </div>
+
+  <section>
+    <h2><span class="idx">1</span>执行过程 <small>每一步都可独立复跑</small></h2>
+    <p class="sub">下面是本次实际执行的命令与结果，不是示意图。客户拿到源码后可原样复现。</p>
+    <div class="step"><div class="n">1</div><div><h3>批量重命名</h3><span class="cmd mono">python cli.py rename --dir workspace/inbox --apply</span><div class="res"><b>19</b> 个文件已统一命名，冲突 <b style="color:#0f6b3d">0</b> 个</div><div class="meta">先出预览表核对，确认无冲突才落盘；重复执行也不会二次改名</div></div></div><div class="step"><div class="n">2</div><div><h3>多表合并（表头不一致）</h3><span class="cmd mono">python cli.py merge --inputs workspace/raw/sales_*.csv</span><div class="res">3 份门店报表 → <b>60</b> 行 / 8 列</div><div class="meta">按表头并集对齐，缺失列留空，每行追加来源文件列便于追溯</div></div></div><div class="step"><div class="n">3</div><div><h3>接口分页同步</h3><span class="cmd mono">python cli.py api --out workspace/out/orders_synced.csv</span><div class="res"><b>137</b> 条订单 / 6 页</div><div class="meta">每页首次请求故意返回 503，共重试 6 次后全部成功，耗时 1.25s</div></div></div><div class="step"><div class="n">4</div><div><h3>自动生成日报</h3><span class="cmd mono">python cli.py report</span><div class="res">Markdown + HTML <b>双格式</b>输出</div><div class="meta">无需人工整理格式，跑完即有可发群的汇报材料</div></div></div>
+  </section>
+
+  <section>
+    <h2><span class="idx">2</span>重命名预览（安全机制证据）</h2>
+    <p class="sub">脚本默认只输出这张预览表，不改任何文件；确认后才执行。日期来源列说明依据的是文件名还是文件时间。</p>
+    <table><thead><tr><th>原文件名</th><th></th><th>新文件名</th><th>日期依据</th></tr></thead>
+    <tbody><tr><td class="mono" style="font-size:12px">photo.jpg</td><td class="arrow">→</td><td class="mono new" style="font-size:12px">2026-09-11_001.jpg</td><td><span class="pill gray">mtime</span></td></tr><tr><td class="mono" style="font-size:12px">photo(1).jpg</td><td class="arrow">→</td><td class="mono new" style="font-size:12px">2026-09-11_002.jpg</td><td><span class="pill gray">mtime</span></td></tr><tr><td class="mono" style="font-size:12px">截图 2024-11-21.png</td><td class="arrow">→</td><td class="mono new" style="font-size:12px">2024-11-21_003.png</td><td><span class="pill gray">filename</span></td></tr><tr><td class="mono" style="font-size:12px">IMG_20240715_093012.jpg</td><td class="arrow">→</td><td class="mono new" style="font-size:12px">2024-07-15_004.jpg</td><td><span class="pill gray">filename</span></td></tr><tr><td class="mono" style="font-size:12px">IMG_20240715_093105.jpg</td><td class="arrow">→</td><td class="mono new" style="font-size:12px">2024-07-15_005.jpg</td><td><span class="pill gray">filename</span></td></tr><tr><td class="mono" style="font-size:12px">IMG_20240716_141230.jpg</td><td class="arrow">→</td><td class="mono new" style="font-size:12px">2024-07-16_006.jpg</td><td><span class="pill gray">filename</span></td></tr><tr><td colspan="4" class="meta" style="color:#8a9aae;font-size:11.5px">… 共 19 条，完整清单见 rename_plan.csv</td></tr></tbody></table>
+  </section>
+
+  <section>
+    <h2><span class="idx">3</span>产物清单</h2>
+    <table><thead><tr><th>文件</th><th>大小</th><th>生成时间</th></tr></thead><tbody><tr><td class="mono" style="font-size:12px">api_sync.log</td><td>0.5 KB</td><td>20:49:54</td></tr><tr><td class="mono" style="font-size:12px">api_sync_stats.json</td><td>0.2 KB</td><td>20:49:54</td></tr><tr><td class="mono" style="font-size:12px">daily_report.md</td><td>1.4 KB</td><td>20:49:54</td></tr><tr><td class="mono" style="font-size:12px">merge_stats.json</td><td>0.2 KB</td><td>20:49:52</td></tr><tr><td class="mono" style="font-size:12px">merged_sales.csv</td><td>3.7 KB</td><td>20:49:52</td></tr><tr><td class="mono" style="font-size:12px">orders_synced.csv</td><td>10.7 KB</td><td>20:49:54</td></tr><tr><td class="mono" style="font-size:12px">rename_plan.csv</td><td>1.4 KB</td><td>20:49:52</td></tr><tr><td class="mono" style="font-size:12px">rename_stats.json</td><td>0.1 KB</td><td>20:49:52</td></tr></tbody></table>
+  </section>
+
+  <section>
+    <h2><span class="idx">4</span>交付前复核清单</h2>
+    <div class="checks">
+      <div class="check"><div class="box"></div><div><b>行数核对</b>合并/同步前后行数一致，差异处有原因说明</div></div>
+      <div class="check"><div class="box"></div><div><b>抽样核对</b>重命名与拆分结果抽 5 条对照原始文件</div></div>
+      <div class="check"><div class="box"></div><div><b>失败留痕</b>接口同步日志逐页记录，重试次数可查</div></div>
+      <div class="check"><div class="box"></div><div><b>可回滚</b>预览表保留旧名→新名映射，异常时可据此还原</div></div>
+    </div>
+  </section>
+
+  <footer>本报告由 <span class="mono">python cli.py report</span> 自动生成 · 同一份数据可重复生成，结果稳定</footer>
+</div></body></html>
