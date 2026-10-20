@@ -6,6 +6,7 @@
     python cli.py merge                                   合并多表
     python cli.py split                                   按列拆表
     python cli.py api                                     接口对接同步
+    python cli.py mock                                    常驻启动 Mock 接口供浏览器访问
     python cli.py report                                  生成运行日报
     python cli.py selftest                                执行自测用例
 """
@@ -80,7 +81,7 @@ def cmd_split(args) -> dict:
 def cmd_api(args) -> dict:
     out_csv = Path(args.out)
     with api_sync.MockServer(total=args.total, fail_first_hit=not args.no_fault) as server:
-        LOG.info("本地 Mock 接口已启动：%s", server.base_url)
+        LOG.info("本地 Mock 接口已启动（仅本次同步期间存在，结束自动关闭）：%s", server.base_url)
         stats = api_sync.sync_orders(
             server.base_url,
             out_csv,
@@ -95,6 +96,16 @@ def cmd_report(args) -> dict:
     md_path = report_daily.build_report(WS, title=args.title)
     html_path = report_daily.build_html_report(WS, title=args.title)
     return {"report": str(md_path), "html": str(html_path)}
+
+
+def cmd_mock(args) -> dict:
+    """前台常驻启动 Mock 接口，供浏览器访问与手工调试；Ctrl+C 退出。"""
+    with api_sync.MockServer(total=args.total, fail_first_hit=not args.no_fault, port=args.port) as server:
+        LOG.info("Mock 接口已启动：%s（按 Ctrl+C 停止）", server.base_url)
+        LOG.info("  浏览器打开 %s 可查看接口说明", server.base_url)
+        LOG.info("  示例：%s/api/orders?page=1&size=5", server.base_url)
+        server.serve()
+    return {"url": server.base_url, "total": args.total}
 
 
 def cmd_demo(args) -> None:
@@ -198,6 +209,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_api.add_argument("--page-size", type=int, default=25)
     p_api.add_argument("--no-fault", action="store_true", help="关闭模拟抖动")
     p_api.set_defaults(func=cmd_api)
+
+    p_mock = sub.add_parser("mock", help="前台常驻启动 Mock 接口（浏览器可访问，Ctrl+C 停止）")
+    p_mock.add_argument("--total", type=int, default=137, help="订单条数")
+    p_mock.add_argument("--port", type=int, default=52154, help="监听端口（默认 52154）")
+    p_mock.add_argument("--no-fault", action="store_true", help="关闭「每页首请求 503」的模拟抖动")
+    p_mock.set_defaults(func=cmd_mock)
 
     p_report = sub.add_parser("report", help="生成 Markdown 运行日报")
     p_report.add_argument("--title", default="自动化批处理日报")

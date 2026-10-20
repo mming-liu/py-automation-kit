@@ -116,6 +116,7 @@ python cli.py split --input workspace\raw\orders_raw.csv --by region --out-dir w
 | 中文显示成乱码 | cmd 代码页不是 UTF-8 | 先执行 `chcp 65001` 再跑 |
 | 提示「存在命名冲突，已中止执行」 | 目标名与已有文件重名 | 换模板（如加 `{parent}`）或清理同名文件；预览表里能看到具体冲突项 |
 | `ModuleNotFoundError: No module named 'kit'` | 不在项目根目录执行 | 先 `cd /d` 到含 `cli.py` 的目录 |
+| 浏览器打开 `http://127.0.0.1:xxxxx` 提示「无法访问 / 拒绝连接」 | Mock 接口**只在命令运行期间存在**：`demo`/`api` 同步完成后自动关闭，事后再打开必然拒绝连接，属于正常设计，不是故障 | 想在浏览器里看接口：另开一个终端运行 `python cli.py mock`，保持窗口不关，浏览器访问 `http://127.0.0.1:52154/`（有接口说明页），`/api/orders?page=1&size=5` 可看数据；用完 Ctrl+C 停止 |
 | Excel 打开 CSV 乱码 | 文件不是 UTF-8 BOM | 本项目输出均为 UTF-8 BOM；若被其他工具另存过，重新用 Excel「数据→从文本」选 UTF-8 导入 |
 
 ## 一、这个 demo 演示了什么
@@ -126,6 +127,7 @@ python cli.py split --input workspace\raw\orders_raw.csv --by region --out-dir w
 | 多表合并（表头不一致） | `python cli.py merge` | 3 个门店各自上报的 CSV | 字段并集对齐的汇总表，带来源列 |
 | 按列拆表下发 | `python cli.py split` | 汇总订单表 | 按区域拆成多份，分发给对应同事 |
 | 接口对接 / 分页同步 | `python cli.py api` | 内置离线 Mock 接口 | 落盘 CSV + 同步日志（含失败重试） |
+| 常驻 Mock 接口（浏览器可访问） | `python cli.py mock` | `--port`（默认 52154） | 前台运行的接口服务，Ctrl+C 停止 |
 | 运行日报 | `python cli.py report` | 上述产出 | 一页 Markdown 日报 + HTML 报告 |
 
 一条命令跑完全部：

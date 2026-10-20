@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import csv
+import json
 import sys
 import tempfile
 import unittest
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -141,6 +143,21 @@ class TestApiSync(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 # 端口上没有服务，必然连不上
                 api_sync.sync_orders("http://127.0.0.1:1", Path(tmp) / "o.csv", max_retries=1, timeout=0.3)
+
+    def test_root_returns_endpoint_index(self):
+        # 浏览器访问根路径应返回接口说明（而不是 404）
+        with api_sync.MockServer(total=5, fail_first_hit=False) as server:
+            with urllib.request.urlopen(f"{server.base_url}/", timeout=3) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+        self.assertIn("endpoints", payload)
+        self.assertTrue(any("/api/orders" in ep for ep in payload["endpoints"]))
+
+    def test_fixed_port_serves_forever_ready(self):
+        # 固定端口模式（cli.py mock 使用）：启动后指定端口立即可用
+        with api_sync.MockServer(total=5, fail_first_hit=False, port=0) as server:
+            with urllib.request.urlopen(f"{server.base_url}/health", timeout=3) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+        self.assertEqual(payload["status"], "ok")
 
 
 def csv_header(path: Path) -> list[str]:

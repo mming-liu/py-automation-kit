@@ -57,6 +57,17 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):  # noqa: N802
         parsed = urlparse(self.path)
+        if parsed.path == "/" or parsed.path == "/index.html":
+            return self._json(
+                {
+                    "service": "本地 Mock 订单接口（离线演示用）",
+                    "hint": "本服务随进程存活，进程退出即关闭。",
+                    "endpoints": [
+                        "GET /health                    存活检查",
+                        "GET /api/orders?page=1&size=25 分页订单（每页首次请求返回 503 以演示重试）",
+                    ],
+                }
+            )
         if parsed.path == "/health":
             return self._json({"status": "ok", "count": len(self.orders)})
         if parsed.path != "/api/orders":
@@ -97,11 +108,11 @@ class _Handler(BaseHTTPRequestHandler):
 class MockServer:
     """上下文管理器：with MockServer() as srv: srv.base_url"""
 
-    def __init__(self, total: int = 137, fail_first_hit: bool = True):
+    def __init__(self, total: int = 137, fail_first_hit: bool = True, port: int = 0):
         _Handler.orders = _fake_orders(total)
         _Handler.fail_first_hit = fail_first_hit
         _Handler._hits = {}
-        self._httpd = ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
+        self._httpd = ThreadingHTTPServer(("127.0.0.1", port), _Handler)
         self.port = self._httpd.server_address[1]
         self._thread: threading.Thread | None = None
 
@@ -123,6 +134,15 @@ class MockServer:
     def __exit__(self, *exc):
         self._httpd.shutdown()
         self._httpd.server_close()
+
+    def serve(self) -> None:
+        """前台常驻：阻塞直到 Ctrl+C，供 cli.py mock 命令在浏览器里查看接口。"""
+        try:
+            self._httpd.serve_forever()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self._httpd.server_close()
 
 
 def _get_json(url: str, timeout: float = 5.0) -> dict:
