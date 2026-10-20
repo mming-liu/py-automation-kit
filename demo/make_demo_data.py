@@ -78,20 +78,21 @@ def _make_split_csv(root: Path) -> Path:
     return path
 
 
-def make_all(workspace: str | Path) -> dict:
+def make_rename_samples(workspace: str | Path) -> dict:
+    """只生成「批量重命名」的样例：19 个命名混乱的文件（不清空 out/）。"""
     ws = Path(workspace)
     inbox = ws / "inbox"
+    inbox.mkdir(parents=True, exist_ok=True)
+    count = _touch_files(inbox)
+    return {"inbox_files": count, "inbox_dir": str(inbox)}
+
+
+def make_merge_samples(workspace: str | Path) -> dict:
+    """只生成「多表合并」的样例：3 份表头不一致的门店报表。"""
+    ws = Path(workspace)
     raw = ws / "raw"
-    out = ws / "out"
+    raw.mkdir(parents=True, exist_ok=True)
 
-    for d in (inbox, raw, out):
-        if d.exists():
-            shutil.rmtree(d)
-        d.mkdir(parents=True, exist_ok=True)
-
-    file_count = _touch_files(inbox)
-
-    # 三个门店各报一份，表头不一致：华东多了"备注"，华南少了"channel"
     base_header = ["order_id", "order_date", "region", "channel", "qty", "unit_price"]
     rng = random.Random(11)
     for idx, region in enumerate(REGIONS):
@@ -115,7 +116,31 @@ def make_all(workspace: str | Path) -> dict:
                 row.pop("channel", None)
             rows.append([row.get(col, "") for col in header])
         _write_csv(raw / f"sales_{region}.csv", header, rows)
+    return {"files": len(REGIONS), "raw_dir": str(raw)}
 
+
+def make_split_sample(workspace: str | Path) -> dict:
+    """只生成「按列拆表」的样例：一张 90 行的总表。"""
+    ws = Path(workspace)
+    raw = ws / "raw"
+    raw.mkdir(parents=True, exist_ok=True)
+    path = _make_split_csv(raw)
+    return {"split_source": str(path)}
+
+
+def make_all(workspace: str | Path) -> dict:
+    ws = Path(workspace)
+    inbox = ws / "inbox"
+    raw = ws / "raw"
+    out = ws / "out"
+
+    for d in (inbox, raw, out):
+        if d.exists():
+            shutil.rmtree(d)
+        d.mkdir(parents=True, exist_ok=True)
+
+    file_count = _touch_files(inbox)
+    make_merge_samples(ws)
     split_csv = _make_split_csv(raw)
 
     return {

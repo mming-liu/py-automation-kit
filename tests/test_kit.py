@@ -160,6 +160,53 @@ class TestApiSync(unittest.TestCase):
         self.assertEqual(payload["status"], "ok")
 
 
+class TestSampleUnits(unittest.TestCase):
+    """最小可执行单元：每个子命令配合 --sample 可独立演示。"""
+
+    def test_rename_samples_are_generated(self):
+        from demo import make_demo_data as md
+
+        with tempfile.TemporaryDirectory() as tmp:
+            info = md.make_rename_samples(tmp)
+            files = [p for p in (Path(tmp) / "inbox").rglob("*") if p.is_file()]
+            self.assertEqual(info["inbox_files"], len(files))
+            self.assertGreaterEqual(len(files), 19)
+
+    def test_merge_samples_have_mismatched_headers(self):
+        from demo import make_demo_data as md
+
+        with tempfile.TemporaryDirectory() as tmp:
+            md.make_merge_samples(tmp)
+            raw = Path(tmp) / "raw"
+            self.assertEqual(len(list(raw.glob("sales_*.csv"))), 3)
+            headers = {tuple(csv_header(p)) for p in raw.glob("sales_*.csv")}
+            self.assertGreater(len(headers), 1)  # 表头确实不一致
+
+    def test_split_sample_creates_source(self):
+        from demo import make_demo_data as md
+
+        with tempfile.TemporaryDirectory() as tmp:
+            info = md.make_split_sample(tmp)
+            self.assertTrue(Path(info["split_source"]).exists())
+
+    def test_merge_command_with_sample_flag(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "merged.csv"
+            res = cli_main_merge(out)  # 辅助函数见下
+            self.assertGreater(res["rows_out"], 0)
+            self.assertTrue(out.exists())
+
+
+def cli_main_merge(out: Path) -> dict:
+    """复现 merge --sample 的数据链路：生成样例 → 合并。"""
+    from demo import make_demo_data as md
+
+    with tempfile.TemporaryDirectory() as tmp:
+        md.make_merge_samples(tmp)
+        inputs = sorted((Path(tmp) / "raw").glob("sales_*.csv"))
+        return sheet_ops.merge_csv(inputs, out, source_column="来源文件", add_source=True, dedupe_key=None)
+
+
 def csv_header(path: Path) -> list[str]:
     with path.open(encoding="utf-8-sig") as fh:
         return next(csv.reader(fh))

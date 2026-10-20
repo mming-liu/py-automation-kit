@@ -35,6 +35,13 @@ def _save_json(path: Path, data: dict) -> None:
 
 # ------------------------------------------------------------------ 各子任务
 def cmd_rename(args) -> dict:
+    if getattr(args, "sample", False):
+        if Path(args.dir).resolve() != (WS / "inbox").resolve():
+            raise SystemExit("--sample 会向 workspace/inbox 写入样例文件，不能与自定义 --dir 同用；处理自己的文件请去掉 --sample")
+        from demo.make_demo_data import make_rename_samples
+
+        info = make_rename_samples(WS)
+        LOG.info("已生成 %d 个乱名样例文件：%s", info["inbox_files"], info["inbox_dir"])
     plan = rename_batch.build_plan(
         args.dir,
         pattern=args.pattern,
@@ -60,7 +67,14 @@ def cmd_rename(args) -> dict:
 
 
 def cmd_merge(args) -> dict:
+    if getattr(args, "sample", False) and not args.inputs:
+        from demo.make_demo_data import make_merge_samples
+
+        info = make_merge_samples(WS)
+        LOG.info("已生成 %d 份表头不一致的样例报表：%s", info["files"], info["raw_dir"])
     inputs = args.inputs or sorted((WS / "raw").glob("*.csv"))
+    if not inputs:
+        raise SystemExit(f"没有找到要合并的 CSV（默认目录 {WS / 'raw'} 为空）。加 --sample 可自动生成样例数据。")
     result = sheet_ops.merge_csv(
         inputs,
         args.out,
@@ -73,6 +87,13 @@ def cmd_merge(args) -> dict:
 
 
 def cmd_split(args) -> dict:
+    if getattr(args, "sample", False) and not Path(args.input).exists():
+        from demo.make_demo_data import make_split_sample
+
+        info = make_split_sample(WS)
+        LOG.info("已生成样例总表：%s", info["split_source"])
+    if not Path(args.input).exists():
+        raise SystemExit(f"找不到输入文件 {args.input}。加 --sample 可自动生成样例数据。")
     result = sheet_ops.split_csv(args.input, args.out_dir, args.by, prefix=args.prefix)
     _save_json(WS / "out" / "split_stats.json", {"groups": result["groups"], "rows": result["rows"]})
     return result
@@ -186,6 +207,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_rename.add_argument("--sort-by", choices=["mtime", "name"], default="mtime")
     p_rename.add_argument("--out", default=None, help="预览表路径")
     p_rename.add_argument("--apply", action="store_true", help="真正执行（不加则只预览）")
+    p_rename.add_argument("--sample", action="store_true", help="先在 workspace/inbox 生成 19 个乱名样例文件再执行")
     p_rename.set_defaults(func=cmd_rename)
 
     p_merge = sub.add_parser("merge", help="合并多个 CSV")
@@ -194,6 +216,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_merge.add_argument("--source-column", default="来源文件")
     p_merge.add_argument("--no-source", action="store_true", help="不追加来源列")
     p_merge.add_argument("--dedupe", default=None, help="按指定列去重")
+    p_merge.add_argument("--sample", action="store_true", help="先生成 3 份表头不一致的样例报表再合并")
     p_merge.set_defaults(func=cmd_merge)
 
     p_split = sub.add_parser("split", help="按列拆分为多个 CSV")
@@ -201,6 +224,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_split.add_argument("--by", default="region")
     p_split.add_argument("--out-dir", default=str(WS / "out" / "parts"))
     p_split.add_argument("--prefix", default="part")
+    p_split.add_argument("--sample", action="store_true", help="先生成 90 行样例总表再拆分")
     p_split.set_defaults(func=cmd_split)
 
     p_api = sub.add_parser("api", help="接口分页同步（内置离线 Mock 服务）")

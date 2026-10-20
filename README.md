@@ -78,7 +78,7 @@ Ran 17 tests in 2.2s
 OK
 ```
 
-17 条都是边界用例：假日期、表头不一致、空目录、接口连不上、重复执行不二次改名。
+23 条都是边界用例：假日期、表头不一致、空目录、接口连不上、重复执行不二次改名。
 
 ### 步骤 6｜换成自己的数据
 
@@ -136,13 +136,25 @@ python cli.py split --input workspace\raw\orders_raw.csv --by region --out-dir w
 python cli.py demo
 ```
 
+**只想看某一个功能？每个子命令都是最小可执行单元**，一条命令独立跑通、自带样例数据（`demo` 只是把这些单元连起来）：
+
+```bash
+python cli.py rename --sample --apply   # 生成 19 个乱名文件 → 重命名（先预览后落盘）
+python cli.py merge --sample            # 生成 3 份表头不一致的报表 → 合并对齐
+python cli.py split --sample            # 生成 90 行总表 → 按区域拆分
+python cli.py api                       # 内置 Mock 接口 → 分页同步 + 重试
+python cli.py mock                      # 浏览器直接查看接口（Ctrl+C 停止）
+```
+
+处理自己的数据时去掉 `--sample`、换 `--dir` / `--inputs` / `--input` 即可。忘记加样例也不会一头雾水：数据缺失时会明确提示「加 --sample 可自动生成」。
+
 ## 二、技术特点（也是能写进方案的差异点）
 
 1. **零依赖**：只用 Python 标准库（`csv` / `http.server` / `urllib` / `pathlib`）。
    客户现场不需要 `pip install`、不需要联网、不会因为装不上 pandas 而卡住。
 2. **默认不破坏数据**：重命名是 `dry-run` 优先，先出预览表 `rename_plan.csv`，有命名冲突直接中止，`--apply` 才真正落盘；重复执行不会二次改名。
 3. **异常路径有人管**：接口首请求失败会按指数退避重试，超过上限明确报错而不是静默丢数据；日志逐页留痕。
-4. **可自测**：`python cli.py selftest` 跑 17 条边界用例（假日期、表头差异、空输入、连不上服务等）。
+4. **可自测**：`python cli.py selftest` 跑 23 条边界用例（假日期、表头差异、空输入、连不上服务等）。
 5. **中文环境适配**：强制 UTF-8 输出，CSV 带 BOM，Excel 双击打开不乱码；读入兼容 GBK 来源文件。
 
 ## 三、目录结构
@@ -157,7 +169,7 @@ py-automation-kit/
 │   ├── api_sync.py         # 内置 Mock 服务 + 分页同步 + 重试
 │   └── report_daily.py     # Markdown 日报
 ├── demo/make_demo_data.py  # 造演示数据（可重复执行）
-├── tests/test_kit.py       # 17 条单元测试
+├── tests/test_kit.py       # 23 条单元测试
 ├── docs/运行说明.md         # 交付给客户的运行说明
 └── workspace/              # 演示工作区（inbox / raw / out）
 ```
@@ -198,7 +210,7 @@ python cli.py selftest
 | 源码 | 全量 `.py`，含注释，无混淆、无编译产物 |
 | 运行说明 | `docs/运行说明.md`，含环境、命令、常见问题 |
 | 演示数据 | `demo/make_demo_data.py`，客户可自行重复生成 |
-| 自测报告 | `python cli.py selftest` 输出，17 条用例 |
+| 自测报告 | `python cli.py selftest` 输出，23 条用例 |
 | 产物样例 | `workspace/out/` 下的预览表、合并表、同步日志、日报 |
 
 ## 七、边界说明（写清楚，避免扯皮）
