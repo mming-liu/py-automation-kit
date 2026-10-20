@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 演示运行时生成（python cli.py demo 可完整重建，不入库避免仓库抖动）
+workspace/inbox/*
+workspace/raw/*
+workspace/out/*
+!workspace/inbox/.gitkeep
+!workspace/raw/.gitkeep
+!workspace/out/.gitkeep
