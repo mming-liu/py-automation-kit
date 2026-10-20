@@ -205,4 +205,16 @@ python cli.py selftest
 
 ---
 
+## 八、同系列仓库（可串成一条链路）
+
+| 仓库 | 作用 |
+| --- | --- |
+| **py-automation-kit**（本仓库） | 文件与接口层：批量整理、多表合并、接口同步，产出规范 CSV |
+| [data-clean-pipeline](https://github.com/mming-liu/data-clean-pipeline) | 数据层：脏表 → 标准数据集，逐格留痕可追溯 |
+| [offline-analytics-report](https://github.com/mming-liu/offline-analytics-report) | 报表层：标准数据集 → 经营复盘报表与结论 |
+
+三个仓库的字段命名一致（`order_id` / `order_date` / `region` / `channel` / `qty` / `unit_price`），可串成 `接口同步 → 清洗 → 报表` 的链路：本仓库负责把散落文件与接口数据整理成规范 CSV，项目二补齐 `amount`、`status` 等字段并清洗，项目三直接用清洗产物出报表（已实测：`clean_dataset.csv` 260 行可直接生成报表）。
+
+---
+
 维护：需求分析师 + 测试与开发工程师 轻量化协作 · 需求先对齐，脚本再落地
